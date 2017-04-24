@@ -1,0 +1,22 @@
+#######################################
+# Syntax Coloring Map For ThingfaceClient
+#######################################
+
+#######################################
+# Datatypes (KEYWORD1)
+#######################################
+
+ThingfaceClient KEYWORD1
+
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+
+connect 	KEYWORD2
+disconnect 	KEYWORD2
+sendSensorValue KEYWORD2
+onCommand   KEYWORD2
+
+#######################################
+# Constants (LITERAL1)
+#######################################

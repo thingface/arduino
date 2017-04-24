@@ -1,0 +1,25 @@
+{
+    "name": "ThingfaceClient",
+    "version": "0.0.1",
+    "keywords": "IoT, MQTT, Arduino, Messaging",
+    "description": "The thingface client library for Arduino",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/thingface/thingface-arduino.git"
+    },
+    "dependencies": [
+        {
+            "name": "PubSubClient",
+            "version": "2.6"
+        },
+        {
+            "name": "ArduinoJson",
+            "version": "5.8.4"
+        }
+    ],
+    "examples": "examples/*/*.ino",
+    "frameworks": "arduino",
+    "platforms": [
+        "atmelavr"
+    ]
+}
