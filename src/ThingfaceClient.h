@@ -14,22 +14,26 @@
 #define THINGFACE_CALLBACK_SIGNATURE std::function<void(const char*, const char**, unsigned int)> commandCallback
 #else
 #define THINGFACE_CALLBACK_SIGNATURE void (*commandCallback)(const char*, const char**, unsigned int)
-#endif 
+#endif
+
+#define T_PORT 1883
 
 class ThingfaceClientClass
 {
  private:
 	PubSubClient* _pubsub;
 	char* _deviceId;
-	char* _secretKey;	
+	char* _secretKey;
 	char _strContains(char*,char*);
 	THINGFACE_CALLBACK_SIGNATURE;
-	
- public:	
+	String buildSensorTopic(const char* sensorId);
+
+ public:
 	void setup(IPAddress ip, Client& client);
 	boolean connect(const char* deviceId, const char* secretKey);
 	void disconnect();
 	void sendSensorValue(const char* sensorId, const float value);
+	void sendSensorValue(const char* sensorId, const int value);
 	void onCommand(THINGFACE_CALLBACK_SIGNATURE);
 	void loop();
 	void _mqttCallback(char*, uint8_t*, unsigned int);

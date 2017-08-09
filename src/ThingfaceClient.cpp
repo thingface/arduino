@@ -8,7 +8,7 @@ void callback(char* topic, byte* payload, unsigned int length)
 
 void ThingfaceClientClass::setup(IPAddress ip, Client& client)
 {
-	this->_pubsub = new PubSubClient(ip, 1883, callback, client);
+	this->_pubsub = new PubSubClient(ip, T_PORT, callback, client);
 }
 
 boolean ThingfaceClientClass::connect(const char* deviceId, const char* secretKey)
@@ -23,18 +23,33 @@ void ThingfaceClientClass::sendSensorValue(const char* sensorId, const float val
 	if (_pubsub!=NULL && _pubsub->connected())
 	{
 		char topicBuffer[50];
-		String topicBuilder = "d/d/";
-		topicBuilder += _deviceId;
-		topicBuilder += "/";
-		topicBuilder += sensorId;
+		String topicBuilder = this->buildSensorTopic(sensorId);
 		topicBuilder.toCharArray(topicBuffer, 50);
 
 		char payloadBuffer[30];
 		String payloadBuilder = "{\"v\":";
-			payloadBuilder += value;
+		payloadBuilder += value;
 		payloadBuilder += "}";
 		payloadBuilder.toCharArray(payloadBuffer, 50);
-		
+
+		_pubsub->publish(topicBuffer, payloadBuffer);
+	}
+}
+
+void ThingfaceClientClass::sendSensorValue(const char* sensorId, const int value)
+{
+	if (_pubsub!=NULL && _pubsub->connected())
+	{
+		char topicBuffer[50];
+		String topicBuilder = this->buildSensorTopic(sensorId);
+		topicBuilder.toCharArray(topicBuffer, 50);
+
+		char payloadBuffer[30];
+		String payloadBuilder = "{\"v\":";
+		payloadBuilder += value;
+		payloadBuilder += "}";
+		payloadBuilder.toCharArray(payloadBuffer, 50);
+
 		_pubsub->publish(topicBuffer, payloadBuffer);
 	}
 }
@@ -44,15 +59,15 @@ void ThingfaceClientClass::onCommand(THINGFACE_CALLBACK_SIGNATURE)
   if(this->_pubsub->connected())
   {
     char topicBuffer[50];
-    String topicBuilder = "u/c/";
+    String topicBuilder = "u/";
     topicBuilder += "+";
-    topicBuilder += "/";
+    topicBuilder += "/c/";
     topicBuilder += _deviceId;
     topicBuilder.toCharArray(topicBuffer, 50);
-    
+
     this->_pubsub->subscribe(topicBuffer);
     this->commandCallback = commandCallback;
-  }  
+  }
 }
 
 void ThingfaceClientClass::loop()
@@ -61,6 +76,15 @@ void ThingfaceClientClass::loop()
 	{
 		_pubsub->loop();
 	}
+}
+
+String ThingfaceClientClass::buildSensorTopic(const char* sensorId)
+{
+	String topicBuilder = "d/";
+	topicBuilder += _deviceId;
+	topicBuilder += "/s/";
+	topicBuilder += sensorId;
+	return topicBuilder;
 }
 
 char ThingfaceClientClass::_strContains(char *str, char *sfind)
@@ -97,7 +121,7 @@ void ThingfaceClientClass::_mqttCallback(char* topic, byte* payload, unsigned in
   Serial.println(topic);
 //#endif
 
-	if(this->_strContains(topic, "u/c/")){
+	if(this->_strContains(topic, "u/")){
 		char json[length];
 		for(int i = 0; i < length; i++){
 			json[i] = (char) payload[i];
@@ -106,15 +130,15 @@ void ThingfaceClientClass::_mqttCallback(char* topic, byte* payload, unsigned in
 		JsonObject& commandPayload = jsonBuffer.parseObject(json);
 		if (commandPayload.success())
 		{
-			const char* name = commandPayload["c"];			
+			const char* name = commandPayload["c"];
 			JsonArray& array = commandPayload["a"];
-			
+
 			unsigned int argsLength = array.size();
 			const char* args[argsLength];
 
 			unsigned int index = 0;
 			for(JsonArray::iterator it=array.begin(); it!=array.end(); ++it)
-			{			
+			{
 				const char* value = *it;
 				args[index] = value;
 				index++;
@@ -125,7 +149,7 @@ void ThingfaceClientClass::_mqttCallback(char* topic, byte* payload, unsigned in
 				this->commandCallback(name, args, argsLength);
 			}
 		}
-	
+
 		//clear
 		memset(json, 0, sizeof(json));
 		memset(&commandPayload, 0, sizeof(commandPayload));

@@ -1,6 +1,6 @@
 {
     "name": "ThingfaceClient",
-    "version": "0.0.1",
+    "version": "0.0.2",
     "keywords": "IoT, MQTT, Arduino, Messaging",
     "description": "The thingface client library for Arduino",
     "repository": {
